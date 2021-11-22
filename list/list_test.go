@@ -28,7 +28,7 @@ func TestEmpty(t *testing.T) {
 func TestOne(t *testing.T) {
 	var l List[int]
 
-	l.Prepend(3)
+	l.Push(3)
 
 	if l.Empty() {
 		t.Errorf("list should have 1 element but is empty")
@@ -68,7 +68,7 @@ func TestMake(t *testing.T) {
 			t.Errorf("expected a head element of %q but saw %q instead", "bob", l.Head())
 		}
 
-		l.Prepend("alice")
+		l.Push("alice")
 		if l.Head() != "alice" {
 			t.Errorf("expected a head element of %q but saw %q instead", "alice", l.Head())
 		}
@@ -105,7 +105,8 @@ func eq[T comparable](t *testing.T, expect T, found T) {
 
 func TestMap(t *testing.T) {
 	nums := Make(2, 4, 6).Map(mult(5))
-	eq(t, 10, nums.Pop())
-	eq(t, 20, nums.Pop())
-	eq(t, 30, nums.Pop())
+	eq(t, 10, nums.At(0))
+	eq(t, 20, nums.At(1))
+	eq(t, 30, nums.At(2))
+	eq(t, 0, nums.At(3))
 }

@@ -34,7 +34,7 @@ func (l List[T]) String() string {
 func Make[T any](vals ...T) List[T] {
 	var l List[T]
 	for i := len(vals)-1; i >= 0; i-- {
-		l.Prepend(vals[i])
+		l.Push(vals[i])
 	}
 	return l
 }
@@ -44,14 +44,24 @@ func (l List[T]) Empty() bool {
 	return l.head == nil
 }
 
-// Head returns the first element of the list. If the list is empty, Head
-// returns the zero-value for the type T. This is the same thing as Peek()
-func (l List[T]) Head() T {
-	if l.head == nil {
-		var v T
-		return v
+// At treats the list like an array and gets the value at the i'th position in
+// the list (zero-indexed)
+func (l List[T]) At(i int) T {
+	for n, at := l.head, 0; n != nil; n, at = n.next, at+1 {
+		if at == i {
+			return n.val
+		}
 	}
-	return l.head.val
+	var v T
+	return v
+}
+
+// Push adds an element to the front of the list
+func (l *List[T]) Push(v T) {
+	l.head = &node[T]{
+		val: v,
+		next: l.head,
+	}
 }
 
 // Pop returns the first element of the list and removes it from the list.
@@ -64,6 +74,16 @@ func (l *List[T]) Pop() T {
 	v := l.head.val
 	l.head = l.head.next
 	return v
+}
+
+// Head returns the first element of the list. If the list is empty, Head
+// returns the zero-value for the type T. This is the same thing as Peek()
+func (l List[T]) Head() T {
+	if l.head == nil {
+		var v T
+		return v
+	}
+	return l.head.val
 }
 
 // Tail returns a list which is the original list without its Head element.
@@ -89,24 +109,14 @@ func (l List[T]) Len() int {
 	return i
 }
 
-// Prepend adds an element to the front of the list
-func (l *List[T]) Prepend(v T) {
-	l.head = &node[T]{
-		val: v,
-		next: l.head,
-	}
-}
-
 // Map applies the input function f to each element of the list l, returning a
 // new list containing the values produced by f
 func (l List[T]) Map(f func(T) T) List[T] {
-	var mapped List[T]
-
 	if l.Empty() {
-		return mapped
+		return List[T]{}
 	}
 
-	mapped.head = &node[T]{val: f(l.head.val)}
+	mapped := List[T]{head: &node[T]{val: f(l.head.val)}}
 	last := mapped.head
 	for n := l.head.next; n != nil; n = n.next {
 		last.next = &node[T]{val: f(n.val)}
@@ -114,4 +124,31 @@ func (l List[T]) Map(f func(T) T) List[T] {
 	}
 
 	return mapped
+}
+
+// Filter applies a predicate function f to each element of the list and
+// returns a new list containing the values of the elements that passed the
+// predicate
+func (l List[T]) Filter(f func(T) bool) List[T] {
+	if l.Empty() {
+		return List[T]{}
+	}
+
+	var passed List[T]
+	var last *node[T]
+	for n := l.head; n != nil; n = n.next {
+		if !f(n.val) {
+			continue
+		}
+
+		if passed.Empty() {
+			passed.head = &node[T]{val: n.val}
+			last = passed.head
+		} else {
+			last.next = &node[T]{val: n.val}
+			last = last.next
+		}
+	}
+
+	return passed
 }
