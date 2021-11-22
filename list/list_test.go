@@ -105,6 +105,7 @@ func eq[T comparable](t *testing.T, expect T, found T) {
 
 func TestMap(t *testing.T) {
 	nums := Make(2, 4, 6).Map(mult(5))
+	t.Logf("Nums: %v", nums)
 	eq(t, 10, nums.At(0))
 	eq(t, 20, nums.At(1))
 	eq(t, 30, nums.At(2))

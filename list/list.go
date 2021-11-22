@@ -2,6 +2,7 @@ package list
 
 import (
 	"strings"
+	"sync"
 	"fmt"
 )
 
@@ -124,6 +125,32 @@ func (l List[T]) Map(f func(T) T) List[T] {
 	}
 
 	return mapped
+}
+
+// Run is the same as Map, but is run concurrently. The function f will be run
+// for every element of l in its own goroutine.
+func Run[T any, Z any](l List[T], f func(T) Z) List[Z] {
+	var wg sync.WaitGroup
+	c := make(chan Z)
+
+	for n := l.head; n != nil; n = n.next {
+		wg.Add(1)
+		go func(v T) {
+			defer wg.Done()
+			c <- f(v)
+		}(n.val)
+	}
+
+	go func() {
+		wg.Wait()
+		close(c)
+	}()
+
+	var results List[Z]
+	for z := range c {
+		results.Push(z)
+	}
+	return results
 }
 
 // Filter applies a predicate function f to each element of the list and
