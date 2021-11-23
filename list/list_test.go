@@ -110,7 +110,9 @@ func TestMap(t *testing.T) {
 	eq(t, 20, nums.At(1))
 	eq(t, 30, nums.At(2))
 	eq(t, 0, nums.At(3))
+
 	eq(t, 30, Max(nums))
+
 }
 
 func TestIter(t *testing.T) {
