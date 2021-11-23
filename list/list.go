@@ -110,6 +110,43 @@ func (l List[T]) Len() int {
 	return i
 }
 
+type iter[T any] struct {
+	n *node[T]
+}
+
+func (i iter[T]) Done() bool { return i.n == nil }
+
+func (i *iter[T]) Next(dest *T) bool {
+	if i.n == nil {
+		return false
+	}
+
+	*dest = i.n.val
+	i.n = i.n.next
+	return true
+}
+
+func (l List[T]) Iter() Iter[T] {
+	return &iter[T]{n: l.head}
+}
+
+// This doesn't work but I wish it did:
+// 
+// func (l List[T comparable]) Max() T {
+// 	if l.Empty() {
+// 		var v T
+// 		return v
+// 	}
+// 	
+// 	v := l.head.val
+// 	for n := l.head.next; n != nil; n = n.next {
+// 		if n.val > v {
+// 			v = n.val
+// 		}
+// 	}
+// 	return v
+// }
+
 // Map applies the input function f to each element of the list l, returning a
 // new list containing the values produced by f
 func (l List[T]) Map(f func(T) T) List[T] {

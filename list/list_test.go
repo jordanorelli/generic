@@ -111,3 +111,10 @@ func TestMap(t *testing.T) {
 	eq(t, 30, nums.At(2))
 	eq(t, 0, nums.At(3))
 }
+
+func TestIter(t *testing.T) {
+	nums := Make(2, 4, 6)
+	for it, n := nums.Iter(), 0; it.Next(&n); {
+		t.Logf("%v", n)
+	}
+}
