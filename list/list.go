@@ -3,6 +3,7 @@ package list
 import (
 	"strings"
 	"sync"
+	"constraints"
 	"fmt"
 )
 
@@ -130,9 +131,24 @@ func (l List[T]) Iter() Iter[T] {
 	return &iter[T]{n: l.head}
 }
 
+func Max[T constraints.Ordered](l List[T]) T {
+ 	if l.Empty() {
+ 		var v T
+ 		return v
+ 	}
+ 	
+ 	v := l.head.val
+ 	for n := l.head.next; n != nil; n = n.next {
+ 		if n.val > v {
+ 			v = n.val
+ 		}
+ 	}
+ 	return v
+}
+
 // This doesn't work but I wish it did:
 // 
-// func (l List[T comparable]) Max() T {
+// func (l List[T Ordered]) Max() T {
 // 	if l.Empty() {
 // 		var v T
 // 		return v
