@@ -41,6 +41,9 @@ func Make[T any](vals ...T) List[T] {
 	return l
 }
 
+// func From[T any](it iter.Able) List[T] {
+// }
+
 // Empty is true for empty lists
 func (l List[T]) Empty() bool {
 	return l.head == nil

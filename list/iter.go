@@ -8,6 +8,10 @@ type Iter[T any] interface {
 	Next(*T) bool
 }
 
+// for v, it := iter.Ate(foods); it.Next(&v); {
+// 
+// }
+
 // This actually works, but for some reason I don't yet understand, defining
 // Max with a constraint of constrains.Ordered that takes Iterable[T] cannot
 // have its type parameter infered, but defining it with the same constraint of

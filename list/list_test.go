@@ -41,6 +41,18 @@ func TestOne(t *testing.T) {
 	if l.Len() != 1 {
 		t.Errorf("expected a list of size 1 but saw %d instead", l.Len())
 	}
+
+	if n := l.Pop(); n != 3 {
+		t.Errorf("popping first element from the list should be 3 but is %d instead", n)
+	}
+
+	if !l.Empty() {
+		t.Errorf("new list is not empty, but should be")
+	}
+
+	if l.Len() != 0 {
+		t.Errorf("expected a list of size 0 but saw %d instead", l.Len())
+	}
 }
 
 func TestMake(t *testing.T) {
