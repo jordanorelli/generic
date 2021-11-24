@@ -6,7 +6,7 @@ import (
 
 func TestSpan(t *testing.T) {
 	var n int
-	s := Span(1, 10)
+	s := Span(1, 10).Iter()
 
 	s.Next(&n)
 	if n != 1 {
@@ -27,10 +27,12 @@ func TestSpan(t *testing.T) {
 	if old != 30 {
 		t.Errorf("expected 30 to be old but saw %d instead", old)
 	}
+
+	t.Logf("%T", Max(Span[uint8](3, 10)))
 }
 
 func TestStep(t *testing.T) {
-	s := Step(1, 10, 3)
+	s := Step(1, 10, 3).Iter()
 	for n := 0; s.Next(&n); {
 		t.Log(n)
 	}
