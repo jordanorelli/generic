@@ -43,6 +43,9 @@ func Start[T any](a Able[T]) (T, Ator[T]) {
 	return v, a.Iter()
 }
 
+// Min gets the minimum value in the iterable collection src. Src must be a
+// collection of ordered values. Min requires that src's definition of
+// iteration is finite.
 func Min[T constraints.Ordered](src Able[T]) T {
 	it := src.Iter()
 	var v T
@@ -59,6 +62,9 @@ func Min[T constraints.Ordered](src Able[T]) T {
 	return min
 }
 
+// Max gets the maximum value in the iterable collection src. Src must be a
+// collection of ordered values. Max requires that src's definition of
+// iteration is finite.
 func Max[T constraints.Ordered](src Able[T]) T {
 	it := src.Iter()
 	var v T
