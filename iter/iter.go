@@ -81,22 +81,32 @@ func Max[T constraints.Ordered](src Able[T]) T {
 	return max
 }
 
+type mapIter[T, Z any] struct {
+	fn func(T) Z
+	src Ator[T]
+}
+
+func (it mapIter[T, Z]) Next(v *Z) bool {
+	var t T
+	if !it.src.Next(&t) {
+		return false
+	}
+	*v = it.fn(t)
+	return true
+}
+
+func (it mapIter[T, Z]) Iter() Ator[Z] { return it }
+
+func Map[T, Z any](src Able[T], f func(T) Z) Able[Z] {
+	return mapIter[T, Z]{fn: f, src: src.Iter()}
+}
+
 // Discarded Iterator types:
-//
-// This was my first attempt. I like to have a method that returns a bool so
-// you can use it succinctly in a for loop, but I didn't love having to call
-// both done and next
 //
 // type Ator[T any] interface {
 // 	Done() bool
 // 	Next() T
 // }
-//
-// I was never optimistic about this. In practice, using this in a for loop is
-// just annoying so I stopped doing it. But also there's another thing I find
-// annoying: it's a copy every time. You're not really iterating over the
-// values, you're iterating over copies of the values, it seemed like a lot of
-// unecessary copying.
 //
 // type Ator[T any] interface {
 //   Next() (T, bool)
