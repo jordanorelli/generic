@@ -6,6 +6,7 @@ import (
 	"github.com/jordanorelli/generic/iter"
 )
 
+// Span represents some range of integers
 type Span[T constraints.Integer] struct {
 	Start T
 	End T

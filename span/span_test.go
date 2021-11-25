@@ -24,7 +24,7 @@ func TestSpan(t *testing.T) {
 	// can be inferred, but when New returns a value of Span[T] (which
 	// satisfies iter.Able[T]), the type parameter cannot be inferred. I don't
 	// know why this behavior exists or if this is the intended behavior.
-	//                +
+	//                |
 	//                |
 	//                V
 	beer := iter.Max[int](New(1, 100))
@@ -35,6 +35,20 @@ func TestSpan(t *testing.T) {
 	old := iter.Min[int](New(30, 40))
 	if old != 30 {
 		t.Errorf("expected 30 to be old but saw %d instead", old)
+	}
+
+	// honestly a very ridiculous use-case, but I'm looking at some weird
+	// inferrence corner cases. It seems the third parameter can't be the
+	// literal 2, you have to explicitly type it.
+	alpha := Step('a', 'z'+1, rune(2))
+
+	// the rune type can't be inferred here either
+	for a, it := iter.Start[rune](alpha); it.Next(&a); {
+		t.Logf("%c", a)
+	}
+
+	// the rune type can't be inferred here either!
+	for a, it := iter.Start[rune](alpha.Iter()); it.Next(&a); {
 	}
 
 	t.Logf("%T", iter.Max[int8](New[int8](3, 10)))

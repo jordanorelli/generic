@@ -5,6 +5,8 @@ import (
 	"sync"
 	"constraints"
 	"fmt"
+
+	"github.com/jordanorelli/generic/iter"
 )
 
 type node[T any] struct {
@@ -40,9 +42,6 @@ func Make[T any](vals ...T) List[T] {
 	}
 	return l
 }
-
-// func From[T any](it iter.Able) List[T] {
-// }
 
 // Empty is true for empty lists
 func (l List[T]) Empty() bool {
@@ -93,7 +92,9 @@ func (l List[T]) Head() T {
 
 // Tail returns a list which is the original list without its Head element.
 // If the original list is an empty list or a list of size 1, Tail is an
-// empty list.
+// empty list. Note that Tail creates a new list that is backed by the same
+// elements as the old list; mutations on the origin list are visible in the
+// tail and vice-versa.
 func (l List[T]) Tail() List[T] {
 	if l.head == nil || l.head.next == nil {
 		return List[T]{}
@@ -114,13 +115,13 @@ func (l List[T]) Len() int {
 	return i
 }
 
-type iter[T any] struct {
+type _iter[T any] struct {
 	n *node[T]
 }
 
-func (i iter[T]) Done() bool { return i.n == nil }
+func (i _iter[T]) Done() bool { return i.n == nil }
 
-func (i *iter[T]) Next(dest *T) bool {
+func (i *_iter[T]) Next(dest *T) bool {
 	if i.n == nil {
 		return false
 	}
@@ -130,9 +131,9 @@ func (i *iter[T]) Next(dest *T) bool {
 	return true
 }
 
-func (l List[T]) Iter() Iter[T] {
-	return &iter[T]{n: l.head}
-}
+func (i *_iter[T]) Iter() iter.Ator[T] { return &_iter[T]{n: i.n} }
+
+func (l List[T]) Iter() iter.Ator[T] { return &_iter[T]{n: l.head} }
 
 func Max[T constraints.Ordered](l List[T]) T {
  	if l.Empty() {
@@ -149,45 +150,81 @@ func Max[T constraints.Ordered](l List[T]) T {
  	return v
 }
 
+// Map exists as a method to permit chaining in the event that your input
+// function maps T -> T. Since methods cannot have type parameters, mapping a
+// function that transforms T -> Z is not possible as a method.
+func (l List[T]) Map(f func(T) T) List[T] { return Map(l, f) }
+
 // Map applies the input function f to each element of the list l, returning a
 // new list containing the values produced by f
-func (l List[T]) Map(f func(T) T) List[T] {
+func Map[T any, Z any](l List[T], f func(T) Z) List[Z] {
 	if l.Empty() {
-		return List[T]{}
+		var empty List[Z]
+		return empty
 	}
 
-	mapped := List[T]{head: &node[T]{val: f(l.head.val)}}
+	mapped := List[Z]{head: &node[Z]{val: f(l.head.val)}}
 	last := mapped.head
 	for n := l.head.next; n != nil; n = n.next {
-		last.next = &node[T]{val: f(n.val)}
+		last.next = &node[Z]{val: f(n.val)}
 		last = last.next
 	}
 
 	return mapped
 }
 
-// Run is the same as Map, but is run concurrently. The function f will be run
-// for every element of l in its own goroutine.
-func Run[T any, Z any](l List[T], f func(T) Z) List[Z] {
-	var wg sync.WaitGroup
-	c := make(chan Z)
+type numbered[T any] struct {
+	val T
+	i int
+}
 
-	for n := l.head; n != nil; n = n.next {
-		wg.Add(1)
-		go func(v T) {
-			defer wg.Done()
-			c <- f(v)
-		}(n.val)
+func waitNClose[T any](wg *sync.WaitGroup, c chan T) {
+	wg.Wait()
+	close(c)
+}
+
+// Run is the same as Map, but is run concurrently. The function f will be run
+// for every element of l in its own goroutine. The results of running f on
+// each of the inputs will be stored into a new list in an order-preserving
+// manner.
+func Run[T any, Z any](l List[T], f func(T) Z) List[Z] {
+	if l.Empty() {
+		var empty List[Z]
+		return empty
 	}
 
-	go func() {
-		wg.Wait()
-		close(c)
-	}()
+	// surprise: type declarations are not allowed inside of generic functions
+	//
+	// type numbered[T any] struct {
+	// 	val T
+	// 	i int
+	// }
+
+	var wg sync.WaitGroup
+	c := make(chan numbered[Z])
+
+	i := 0
+	for n := l.head; n != nil; n = n.next{
+		wg.Add(1)
+		go func(v T, i int) {
+			defer wg.Done()
+			c <- numbered[Z]{val: f(v), i: i}
+		}(n.val, i)
+		i++
+	}
+
+	mem := make([]Z, i)
+	go waitNClose(&wg, c)
+	for z := range c {
+		mem[z.i] = z.val
+	}
 
 	var results List[Z]
-	for z := range c {
-		results.Push(z)
+	for i, _ := range mem {
+		results.head = &node[Z]{
+			val: mem[i],
+			next: results.head,
+		}
 	}
 	return results
 }
@@ -217,4 +254,24 @@ func (l List[T]) Filter(f func(T) bool) List[T] {
 	}
 
 	return passed
+}
+
+type Pair[T any, Z any] struct {
+	Left T
+	Right Z
+}
+
+// Zip takes two lists and joins them to create a list of pairs. It's the same
+// as the python zip function, and totally stupid and Pair should not be in
+// this package but I'm testing the iterable interfaces and this shows they are
+// good, actually
+func Zip[T any, Z any](left List[T], right List[Z]) List[Pair[T, Z]] {
+	lit, rit := left.Iter(), right.Iter()
+	var out List[Pair[T, Z]]
+
+	var next Pair[T, Z]
+	for lit.Next(&next.Left) && rit.Next(&next.Right) {
+		out.head = &node[Pair[T, Z]]{val: next, next: out.head}
+	}
+	return out
 }

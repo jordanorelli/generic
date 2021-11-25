@@ -1,15 +1,15 @@
 package list
 
-type Iterable[T any] interface {
-	Iter() Iter[T]
-}
-
-type Iter[T any] interface {
-	Next(*T) bool
-}
+// type Iterable[T any] interface {
+// 	Iter() Iter[T]
+// }
+//
+// type Iter[T any] interface {
+// 	Next(*T) bool
+// }
 
 // for v, it := iter.Ate(foods); it.Next(&v); {
-// 
+//
 // }
 
 // This actually works, but for some reason I don't yet understand, defining
@@ -20,7 +20,7 @@ type Iter[T any] interface {
 //
 // func Max[T constraints.Ordered](l Iterable[T]) T {
 // 	it := l.Iter()
-// 
+//
 // 	var v T
 // 	if !it.Next(&v) {
 // 		return v
@@ -33,7 +33,6 @@ type Iter[T any] interface {
 // 	}
 // 	return max
 // }
-
 
 // Discarded Iterator types:
 //

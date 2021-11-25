@@ -2,6 +2,7 @@ package list
 
 import (
 	"testing"
+	"time"
 )
 
 func TestEmpty(t *testing.T) {
@@ -124,7 +125,18 @@ func TestMap(t *testing.T) {
 	eq(t, 0, nums.At(3))
 
 	eq(t, 30, Max(nums))
+}
 
+func TestRun(t *testing.T) {
+	sleep := func(n int) time.Duration {
+		dur := time.Duration(n) * time.Millisecond
+		time.Sleep(dur)
+		return dur
+	}
+
+	l := Make(1, 2, 3, 4, 5, 4, 3, 2, 1)
+	durs := Run(l, sleep)
+	t.Logf("%v", durs)
 }
 
 func TestIter(t *testing.T) {

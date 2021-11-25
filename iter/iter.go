@@ -80,3 +80,24 @@ func Max[T constraints.Ordered](src Able[T]) T {
 	}
 	return max
 }
+
+// Discarded Iterator types:
+//
+// This was my first attempt. I like to have a method that returns a bool so
+// you can use it succinctly in a for loop, but I didn't love having to call
+// both done and next
+//
+// type Ator[T any] interface {
+// 	Done() bool
+// 	Next() T
+// }
+//
+// I was never optimistic about this. In practice, using this in a for loop is
+// just annoying so I stopped doing it. But also there's another thing I find
+// annoying: it's a copy every time. You're not really iterating over the
+// values, you're iterating over copies of the values, it seemed like a lot of
+// unecessary copying.
+//
+// type Ator[T any] interface {
+//   Next() (T, bool)
+// }
