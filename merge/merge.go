@@ -18,6 +18,7 @@ package merge
 // Although the type B satisfies the interface Merges[*C], it does not satisfy
 // the constraint [X Merges[X]], which is what is used throughout this package.
 type Merges[X any] interface {
+	// MergeIdentity defines the identity for the merge function
 	MergeIdentity() X
 	Merge(X) error
 }

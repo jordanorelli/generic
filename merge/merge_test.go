@@ -10,14 +10,12 @@ type additive struct {
 	total int
 }
 
-func (*additive) MergeIdentity() *additive {
-	return new(additive)
-}
-
 func (a *additive) Merge(b *additive) error {
 	a.total += b.total
 	return nil
 }
+
+func (*additive) MergeIdentity() *additive { return new(additive) }
 
 func add(n int) *additive {
 	return &additive{total: n}
@@ -27,9 +25,7 @@ type multiplicative struct {
 	scale int
 }
 
-func (m *multiplicative) MergeIdentity() *multiplicative {
-	return &multiplicative{scale: 1}
-}
+func (*multiplicative) MergeIdentity() *multiplicative { return &multiplicative{scale: 1} }
 
 func (m *multiplicative) Merge(v *multiplicative) error {
 	m.scale *= v.scale
@@ -46,13 +42,13 @@ type exclusive struct {
 	stock int
 }
 
-func (*exclusive) MergeIdentity() *exclusive { return new(exclusive) }
-
 func (e *exclusive) Merge(source *exclusive) error {
 	e.stock += source.stock
 	source.stock = 0
 	return nil
 }
+
+func (*exclusive) MergeIdentity() *exclusive { return new(exclusive) }
 
 func ex(n int) *exclusive {
 	return &exclusive{stock: n}

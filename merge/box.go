@@ -44,14 +44,16 @@ func strip[X any](f func(X) error) func(interface{}) error {
 	}
 }
 
+func stripReturn[X any](f func() X) func() interface{} {
+	return func() interface {} { return f() }
+}
+
 // Box takes a mergeable value and creates a new mergeable value of type Boxed.
 // Any two Boxed values can attempt to merge at runtime.
 func Box[X Merges[X]](x X) Boxed {
 	return Boxed{
 		val: x,
-		ident: func() interface{} {
-			return x.MergeIdentity()
-		},
+		ident: stripReturn(x.MergeIdentity),
 		merge: strip(x.Merge),
 	}
 }
