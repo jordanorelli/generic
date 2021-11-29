@@ -66,3 +66,30 @@ func TestBind(t *testing.T) {
 		}
 	})
 }
+
+func TestNew(t *testing.T) {
+	count := Bind(utf8.RuneCountInString)
+
+	getCity := func(name string) (string, bool) {
+		if name == "Jordan" {
+			return "Chicago", true
+		}
+		return "", false
+	}
+
+	if n, ok := count(New(getCity("Jordan"))).Open(); !ok {
+		t.Errorf("should be ok")
+	} else {
+		if n != 7 {
+			t.Errorf("what")
+		}
+	}
+
+	if n, ok := count(New(getCity("poopface jones"))).Open(); ok {
+		t.Errorf("should not be ok")
+	} else {
+		if n != 0 {
+			t.Errorf("why do we have this value %d", n)
+		}
+	}
+}
