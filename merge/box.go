@@ -11,6 +11,7 @@ import (
 // heterogeneous members, but should likely be avoided otherwise.
 type Boxed struct {
 	val   interface{}
+	ident func() interface{}
 	merge func(interface{}) error
 }
 
@@ -21,8 +22,18 @@ func (b Boxed) Merge(from Boxed) error {
 	return nil
 }
 
+func (b Boxed) MergeIdentity() Boxed {
+	return Boxed{
+		val: b.ident(),
+		ident: b.ident,
+		merge: b.merge,
+	}
+}
+
 var typeMismatch = errors.New("mismatched types")
 
+// strip takes a typed function and erases the type information from its
+// parameter
 func strip[X any](f func(X) error) func(interface{}) error {
 	return func(v interface{}) error {
 		vv, ok := v.(X)
@@ -38,6 +49,9 @@ func strip[X any](f func(X) error) func(interface{}) error {
 func Box[X Merges[X]](x X) Boxed {
 	return Boxed{
 		val: x,
+		ident: func() interface{} {
+			return x.MergeIdentity()
+		},
 		merge: strip(x.Merge),
 	}
 }

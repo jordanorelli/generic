@@ -35,4 +35,7 @@ func TestMergeTables(t *testing.T) {
 	check("strawberry", 2)
 	check("pistacchio", 5)
 
+	bob["pistacchio"].Merge(add(100))
+	bob["pistacchio"] = add(1)
+	check("pistacchio", 5)
 }
