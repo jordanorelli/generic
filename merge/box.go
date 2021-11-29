@@ -27,7 +27,7 @@ func strip[X any](f func(X) error) func(interface{}) error {
 	return func(v interface{}) error {
 		vv, ok := v.(X)
 		if !ok {
-			return fmt.Errorf("unable to merge value of type %T into value of type %T: %w", v, vv, typeMismatch)
+			return fmt.Errorf("unexpected %T value, expected %T instead: %w", v, vv, typeMismatch)
 		}
 		return f(vv)
 	}
