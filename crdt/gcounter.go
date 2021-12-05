@@ -43,11 +43,11 @@ func (g GCounter[K]) Add(slot K, delta int) error {
 	return nil
 }
 
-func (g *GCounter[K]) Merge(dest *GCounter[K]) {
+// Merge into some destination val
+func (g *GCounter[K]) MergeInto(dest *GCounter[K]) {
 	for slot, count := range g.slots {
 		v := max(count, dest.slots[slot])
 		dest.slots[slot] = v
-		g.slots[slot] = v
 	}
 }
 

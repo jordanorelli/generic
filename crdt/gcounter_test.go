@@ -62,4 +62,37 @@ func TestGCounter(t *testing.T) {
 			t.Fatalf("new gcounter has count of %d, should be 7", n)
 		}
 	})
+
+	t.Run("merge", func(t *testing.T) {
+		type hostname string
+
+		host1 := NewGCounter[hostname]()
+		host2 := NewGCounter[hostname]()
+
+		host1.Add("host1", 3)
+		host2.Add("host2", 6)
+
+		host2.MergeInto(&host1)
+		if n := host1.Total(); n != 9 {
+			t.Errorf("merging once produced %d instead of 9", n)
+		}
+
+		host2.MergeInto(&host1)
+		if n := host1.Total(); n != 9 {
+			t.Errorf("merging a second time changed the target")
+		}
+
+		if n := host2.Total(); n != 6 {
+			t.Errorf("merging changed the source")
+		}
+		host1.MergeInto(&host2)
+		if host1.Total() != host2.Total() {
+			t.Errorf("merging both ways didn't converge")
+		}
+
+		host2.Incr("host2")
+		if host1.Total() == host2.Total() {
+			t.Errorf("improper post-merge mutation")
+		}
+	})
 }
