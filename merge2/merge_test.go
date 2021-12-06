@@ -109,29 +109,47 @@ func TestMap(t *testing.T) {
 }
 
 func TestBox(t *testing.T) {
-	t.Run("empty", func (t *testing.T) {
+	t.Run("both empty", func (t *testing.T) {
 		var a Boxed
 		var b Boxed
-		if err := a.MergeInto(&b); err != nil {
-			t.Fatalf("empty boxes failed to merge: %v", err)
-		}
-	})
-
-	// an empty box can merge into anything and it should be a no-op
-	t.Run("empty source", func (t *testing.T) {
-		var a Boxed
-		b := additive(3)
-		if err := a.MergeInto(&b); err != nil {
-			t.Fatalf("empty boxes failed to merge: %v", err)
-		}
-	})
-
-	t.Run("homologous", func(t *testing.T) {
-		a, b := Box(additive(3)), Box(additive(8))
 		if err := a.MergeInto(b); err != nil {
-			t.Fatalf("homologous boxes failed to merge: %v", err)
+			t.Fatalf("empty boxes failed to merge: %v", err)
 		}
 	})
+
+	t.Run("empty source", func(t *testing.T) {
+		var a Boxed
+		b := Box[additive, additive](additive(3))
+
+		if err := a.MergeInto(b); err != nil {
+			t.Error(err.Error())
+		}
+	})
+
+	// t.Run("empty destination", func(t *testing.T) {
+	// 	a := Box[additive, additive](additive(3))
+	// 	var b Boxed
+
+	// 	if err := a.MergeInto(b); err != nil {
+	// 		t.Error(err.Error())
+	// 	}
+	// })
+	
+	// an empty box can merge into anything and it should be a no-op
+	// t.Run("empty source", func (t *testing.T) {
+	// 	var a Boxed
+	// 	b := additive(3)
+	// 	if err := a.MergeInto(b); err != nil {
+	// 		t.Fatalf("empty boxes failed to merge: %v", err)
+	// 	}
+	// })
+
+	// t.Run("homologous", func(t *testing.T) {
+	// 	a, b := Box(additive(3)), Box(additive(8))
+	// 	if err := a.MergeInto(b); err != nil {
+	// 		t.Fatalf("homologous boxes failed to merge: %v", err)
+	// 	}
+	// })
 
 	// a, b := Box(additive(3)), Box(additive(5))
 	// if err := b.MergeInto(&a); err != nil {

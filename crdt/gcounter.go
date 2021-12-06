@@ -16,10 +16,19 @@ func NewGCounter[K comparable]() GCounter[K] {
 	return GCounter[K]{slots: make(map[K]int)}
 }
 
+// GCounter is a grow-only counter.
+//
+// In the general case, some N hosts will read and write to the gcounter and
+// periodically merge their state, providing eventual consistency and allowing
+// all nodes to write. Each node must have a unique ID, and should write into
+// the slot that associates to that ID. The slot ID is not embedded into the
+// gcounter itself, and the assignment of IDs to nodes is not provided.
 type GCounter[K comparable] struct {
 	slots map[K]int `json:"slots"`
 }
 
+// Incr increments the value in the gcounter at the provided slot. Callers must
+// provide the slot to be incremeneted.
 func (g GCounter[K]) Incr(slot K) error {
 	var zero K
 	if slot == zero {

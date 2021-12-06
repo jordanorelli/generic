@@ -19,4 +19,4 @@ type Ref[T any] struct { ptr *T }
 // Val reads the value for this reference
 func (r Ref[T]) Val() T { return *r.ptr }
 
-func (r Ref[T]) String() string { return fmt.Sprintf("ref{%s}", *r.ptr) }
+func (r Ref[T]) String() string { return fmt.Sprintf("ref{%v}", *r.ptr) }
